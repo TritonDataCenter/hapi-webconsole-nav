@@ -1,0 +1,25 @@
+
+type Category {
+  name: String!
+  slug: String!
+  services: [Service]!
+}
+
+type Datacenter {
+  name: String!
+  url: String!
+}
+
+type Service {
+  name: String!
+  slug: String!
+  description: String!
+  url: String!
+  tags: [String]
+}
+
+type Query {
+  datacenters: [Datacenter]
+  categories: [Category]
+  service(slug: String): Service
+}

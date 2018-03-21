@@ -1,0 +1,33 @@
+{
+  "name": "hapi-webconsole-nav",
+  "version": "0.0.0",
+  "description": "Webconsole navigation plugin for hapi",
+  "main": "lib",
+  "scripts": {
+    "dev": "NODE_ENV=development node dev-server.js",
+    "lint": "belly-button -f",
+    "pretest": "yarn lint",
+    "test": "lab -c",
+    "test-ci": "yarn run lint && lab -c -r junit -o test.xml -r html -o test.html -r console -o stdout"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joyent/hapi-webconsole-nav.git"
+  },
+  "keywords": [],
+  "author": "wyatt",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/joyent/hapi-webconsole-nav/issues"
+  },
+  "homepage": "https://github.com/joyent/hapi-webconsole-nav#readme",
+  "dependencies": {
+    "graphi": "5.4.x"
+  },
+  "devDependencies": {
+    "belly-button": "4.x.x",
+    "code": "5.x.x",
+    "hapi": "17.x.x",
+    "lab": "15.x.x"
+  }
+}
