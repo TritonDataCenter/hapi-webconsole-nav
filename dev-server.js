@@ -30,7 +30,10 @@ async function main () {
   await server.register([
     {
       plugin: Navigation,
-      options
+      options,
+      routes: {
+        prefix: '/navigation'
+      }
     }
   ]);
 
