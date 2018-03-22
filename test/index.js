@@ -7,49 +7,16 @@ const { graphql } = require('graphi');
 const Hapi = require('hapi');
 const Lab = require('lab');
 const Navigation = require('../');
+
 const schema = Fs.readFileSync(Path.join(__dirname, '../lib/schema.graphql'));
+const MockData = require('./mock-data.json');
 
 const lab = exports.lab = Lab.script();
 const { describe, it } = lab;
 
 const register = {
   plugin: Navigation,
-  options: {
-    datacenters: [
-      {
-        name: 'development',
-        url: 'http://localhost'
-      }
-    ],
-    categories: [
-      {
-        name: 'Compute',
-        slug: 'compute',
-        services: [
-          {
-            name: 'VMs & Containers',
-            slug: 'vms_containers',
-            description: 'Run VMs and bare metal containers',
-            url: '/instaces',
-            tags: []
-          }
-        ]
-      },
-      {
-        name: 'Help & Support',
-        slug: 'help_support',
-        services: [
-          {
-            name: 'Service Status',
-            slug: 'service_status',
-            description: 'Find out about the status of our services',
-            url: '/status',
-            tags: []
-          }
-        ]
-      }
-    ]
-  }
+  options: MockData
 };
 
 describe('Navigation', () => {
@@ -88,8 +55,8 @@ describe('Navigation', () => {
     await server.register(register);
     await server.initialize();
 
-    const res = await server.inject({ url: '/graphql', method: 'post', payload: { query: 'query { datacenters { name url } }' } });
-    expect(res.result.data.datacenters[0].name).to.equal(register.options.datacenters[0].name);
+    const res = await server.inject({ url: '/graphql', method: 'post', payload: { query: 'query { regions { datacenters { name url } } }' } });
+    expect(res.result.data.regions[0].datacenters[0].name).to.equal(register.options.regions[0].datacenters[0].name);
     await server.stop();
   });
 
@@ -108,8 +75,8 @@ describe('Navigation', () => {
     await server.register(register);
     await server.initialize();
 
-    const res = await server.inject({ url: '/graphql', method: 'post', payload: { query: 'query { service(slug: "help_support") { name } }' } });
-    expect(res.result.data.service.name).to.equal('Help & Support');
+    const res = await server.inject({ url: '/graphql', method: 'post', payload: { query: 'query { service(slug: "contact-support") { name } }' } });
+    expect(res.result.data.service.name).to.equal('Contact Support');
     await server.stop();
   });
 });

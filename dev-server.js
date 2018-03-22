@@ -5,43 +5,19 @@ const Navigation = require('.');
 
 
 const { PORT = 3068 } = process.env;
+const MockData = require('./test/mock-data.json');
 
-const options = {
-  datacenters: [
-    {
-      name: 'development',
-      url: `http://127.0.0.1:${PORT}`
-    }
-  ],
-  categories: [
-    {
-      name: 'Compute',
-      slug: 'compute',
-      services: [
-        {
-          name: 'VMs & Containers',
-          slug: 'vms_containers',
-          description: 'Run VMs and bare metal containers',
-          url: '/instaces',
-          tags: []
-        }
-      ]
-    },
-    {
-      name: 'Help & Support',
-      slug: 'help_support',
-      services: [
-        {
-          name: 'Service Status',
-          slug: 'service_status',
-          description: 'Find out about the status of our services',
-          url: '/status',
-          tags: []
-        }
-      ]
-    }
-  ]
-};
+const options = Object.assign(MockData, {
+  regions: MockData.regions.map((region) => {
+    return Object.assign(region, {
+      datacenters: region.datacenters.map((dc) => {
+        return Object.assign(dc, {
+          url: `http://127.0.0.1:${PORT}`
+        });
+      })
+    });
+  })
+});
 
 const server = Hapi.server({
   port: PORT,
