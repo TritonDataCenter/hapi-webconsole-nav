@@ -7,6 +7,15 @@ enum Continent {
   AUSTRALIA
 }
 
+type User {
+  id: ID
+  login: String
+  email: String
+  firstName: String
+  lastName: String
+  avatar(fallback: String): String
+}
+
 type Region {
   name: String!
   continent: Continent!
@@ -33,6 +42,7 @@ type Service {
 }
 
 type Query {
+  account: User
   regions: [Region]
   categories: [Category]
   service(slug: String): Service
