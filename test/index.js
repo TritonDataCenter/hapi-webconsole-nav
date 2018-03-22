@@ -6,20 +6,34 @@ const { expect } = require('code');
 const { graphql } = require('graphi');
 const Hapi = require('hapi');
 const Lab = require('lab');
+const StandIn = require('stand-in');
 const Navigation = require('../');
+const CloudApi = require('../lib/cloudapi');
+
 
 const schema = Fs.readFileSync(Path.join(__dirname, '../lib/schema.graphql'));
 const MockData = require('./mock-data.json');
 
 const lab = exports.lab = Lab.script();
-const { describe, it } = lab;
+const { afterEach, describe, it } = lab;
+
+const options = Object.assign(MockData, {
+  keyPath: Path.join(__dirname, 'test.key'),
+  keyId: '/boo/keys/test',
+  apiBaseUrl: 'http://localhost',
+  dcName: 'us-east-1'
+});
 
 const register = {
   plugin: Navigation,
-  options: MockData
+  options
 };
 
 describe('Navigation', () => {
+  afterEach(() => {
+    StandIn.restoreAll();
+  });
+
   it('can be registered with hapi', async () => {
     const server = new Hapi.Server();
     await server.register(register);
@@ -50,7 +64,48 @@ describe('Navigation', () => {
     }
   });
 
-  it('can retrieve a list of datacenters', async () => {
+  it('can get your account', async () => {
+    const user = {
+      id: '4fc13ac6-1e7d-cd79-f3d2-96276af0d638',
+      login: 'barbar',
+      email: 'barbar@example.com',
+      companyName: 'Example',
+      firstName: 'BarBar',
+      lastName: 'Jinks',
+      phone: '(123)457-6890',
+      updated: '2015-12-23T06:41:11.032Z',
+      created: '2015-12-23T06:41:11.032Z'
+    };
+
+    const server = new Hapi.Server();
+    StandIn.replaceOnce(CloudApi.prototype, 'fetch', (stand, path, options) => {
+      return user;
+    });
+
+    await server.register(register);
+    await server.initialize();
+    const res = await server.inject({
+      url: '/graphql',
+      method: 'post',
+      payload: { query: 'query { account { login email emailHash } }' }
+    });
+    expect(res.statusCode).to.equal(200);
+    expect(res.result.data.account).to.exist();
+    expect(res.result.data.account.login).to.equal(user.login);
+    expect(res.result.data.account.email).to.equal(user.email);
+  });
+
+  it('can retrieve the current datacenter', async () => {
+    const server = new Hapi.Server();
+    await server.register(register);
+    await server.initialize();
+
+    const res = await server.inject({ url: '/graphql', method: 'post', payload: { query: 'query { datacenter { name url } }' } });
+    expect(res.result.data.datacenter.name).to.equal('us-east-1');
+    await server.stop();
+  });
+
+  it('can retrieve a list of regions', async () => {
     const server = new Hapi.Server();
     await server.register(register);
     await server.initialize();
