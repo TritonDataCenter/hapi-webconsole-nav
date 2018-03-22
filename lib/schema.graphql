@@ -13,7 +13,7 @@ type User {
   email: String
   firstName: String
   lastName: String
-  avatar(fallback: String): String
+  emailHash: String
 }
 
 type Region {
@@ -43,6 +43,7 @@ type Service {
 
 type Query {
   account: User
+  datacenter: Datacenter
   regions: [Region]
   categories: [Category]
   service(slug: String): Service
