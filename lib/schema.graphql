@@ -1,8 +1,16 @@
+enum Continent {
+  AFRICA
+  ASIA
+  EUROPE
+  NORTH_AMERICA
+  SOUTH_AMERICA
+  AUSTRALIA
+}
 
-type Category {
+type Region {
   name: String!
-  slug: String!
-  services: [Service]!
+  continent: Continent!
+  datacenters: [Datacenter]!
 }
 
 type Datacenter {
@@ -10,16 +18,22 @@ type Datacenter {
   url: String!
 }
 
+type Category {
+  name: String!
+  slug: String
+  services: [Service]!
+}
+
 type Service {
   name: String!
   slug: String!
   description: String!
-  url: String!
+  url: String
   tags: [String]
 }
 
 type Query {
-  datacenters: [Datacenter]
+  regions: [Region]
   categories: [Category]
   service(slug: String): Service
 }
