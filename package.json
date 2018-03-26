@@ -7,7 +7,7 @@
     "dev": "node -r ./.env.js dev-server.js",
     "lint": "belly-button -f",
     "pretest": "yarn lint",
-    "test": "lab -c",
+    "test": "lab -t 86",
     "test-ci": "yarn run lint && lab -c -r junit -o test.xml -r html -o test.html -r console -o stdout"
   },
   "repository": {

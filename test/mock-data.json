@@ -92,7 +92,8 @@
         {
           "name": "VMs & Containers",
           "slug": "instances",
-          "description": "Run VMs and bare metal containers"
+          "description": "Run VMs and bare metal containers",
+          "path": "/instances"
         }
       ]
     },
@@ -154,7 +155,8 @@
         {
           "name": "Service Status",
           "slug": "status",
-          "description": "Find out about the status of our services"
+          "description": "Find out about the status of our services",
+          "url": "https://joyent.com/support"
         },
         {
           "name": "Contact Support",

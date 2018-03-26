@@ -21,6 +21,7 @@ const options = Object.assign(MockData, {
   keyPath: Path.join(__dirname, 'test.key'),
   keyId: '/boo/keys/test',
   apiBaseUrl: 'http://localhost',
+  baseUrl: 'http://us-east-1.test.com',
   dcName: 'us-east-1'
 });
 
@@ -102,6 +103,7 @@ describe('Navigation', () => {
 
     const res = await server.inject({ url: '/graphql', method: 'post', payload: { query: 'query { datacenter { name url } }' } });
     expect(res.result.data.datacenter.name).to.equal('us-east-1');
+    expect(res.result.data.datacenter.url).to.equal('http://localhost');
     await server.stop();
   });
 
@@ -115,13 +117,19 @@ describe('Navigation', () => {
     await server.stop();
   });
 
-  it('can retrieve a list of categories', async () => {
+  it('can retrieve a list of categories with the correct urls', async () => {
     const server = new Hapi.Server();
     await server.register(register);
     await server.initialize();
 
-    const res = await server.inject({ url: '/graphql', method: 'post', payload: { query: 'query { categories { name } }' } });
+    const res = await server.inject({ url: '/graphql', method: 'post', payload: { query: 'query { categories { name services { name url } } }' } });
     expect(res.result.data.categories[0].name).to.equal(register.options.categories[0].name);
+    expect(res.result.data.categories[0].services[0].name).to.equal('VMs & Containers');
+    expect(res.result.data.categories[0].services[0].url).to.equal(register.options.baseUrl + '/instances');
+    expect(res.result.data.categories[1].services[1].url).to.equal(register.options.baseUrl + '/');
+    expect(res.result.data.categories[4].services[0].name).to.equal('Service Status');
+    expect(res.result.data.categories[4].services[0].url).to.equal('https://joyent.com/support');
+
     await server.stop();
   });
 
