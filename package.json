@@ -1,6 +1,6 @@
 {
   "name": "hapi-webconsole-nav",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Webconsole navigation plugin for hapi",
   "main": "lib",
   "scripts": {
