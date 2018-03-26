@@ -33,7 +33,8 @@ const options = Object.assign(MockData, {
   keyPath: SDC_KEY_PATH,
   keyId: '/' + SDC_ACCOUNT + '/keys/' + SDC_KEY_ID,
   apiBaseUrl: SDC_URL,
-  dcName: DC_NAME || Url.parse(SDC_URL).host.split('.')[0]
+  dcName: DC_NAME || Url.parse(SDC_URL).host.split('.')[0],
+  baseUrl: BASE_URL
 });
 
 const server = Hapi.server({
