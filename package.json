@@ -4,7 +4,7 @@
   "description": "Webconsole navigation plugin for hapi",
   "main": "lib",
   "scripts": {
-    "dev": "node -r ./.env.js dev-server.js",
+    "dev": "NODE_ENV=development NAMESPACE=navigation node -r ./.env.js dev-server.js",
     "lint": "belly-button -f",
     "pretest": "yarn lint",
     "test": "lab -t 86",
