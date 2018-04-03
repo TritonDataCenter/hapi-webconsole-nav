@@ -8,7 +8,7 @@ const Hapi = require('hapi');
 const Lab = require('lab');
 const StandIn = require('stand-in');
 const Navigation = require('../');
-const CloudApi = require('cloudapi-client');
+const CloudApi = require('webconsole-cloudapi-client');
 
 
 const schema = Fs.readFileSync(Path.join(__dirname, '../lib/schema.graphql'));
