@@ -47,4 +47,5 @@ type Query {
   regions: [Region]
   categories: [Category]
   service(slug: String): Service
+  accountServices: [Service]
 }

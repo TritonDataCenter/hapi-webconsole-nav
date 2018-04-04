@@ -142,4 +142,16 @@ describe('Navigation', () => {
     expect(res.result.data.service.name).to.equal('Contact Support');
     await server.stop();
   });
+
+  it('can get the account services', async () => {
+    const server = new Hapi.Server();
+    await server.register(register);
+    await server.initialize();
+
+    const res = await server.inject({ url: '/graphql', method: 'post', payload: { query: 'query { accountServices { name, url } }' } });
+    expect(res.result.data.accountServices[0].name).to.equal('Logout');
+    expect(res.result.data.accountServices[0].url).to.equal('/logout');
+
+    await server.stop();
+  });
 });
