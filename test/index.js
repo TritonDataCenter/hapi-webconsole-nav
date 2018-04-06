@@ -144,13 +144,29 @@ describe('Navigation', () => {
   });
 
   it('can get the account services', async () => {
+    const user = {
+      id: '4fc13ac6-1e7d-cd79-f3d2-96276af0d638',
+      login: 'barbar',
+      email: 'barbar@example.com',
+      companyName: 'Example',
+      firstName: 'BarBar',
+      lastName: 'Jinks',
+      phone: '(123)457-6890',
+      updated: '2015-12-23T06:41:11.032Z',
+      created: '2015-12-23T06:41:11.032Z'
+    };
+
     const server = new Hapi.Server();
+    StandIn.replaceOnce(CloudApi.prototype, 'fetch', (stand, path, options) => {
+      return user;
+    });
+
     await server.register(register);
     await server.initialize();
 
-    const res = await server.inject({ url: '/graphql', method: 'post', payload: { query: 'query { accountServices { name, url } }' } });
-    expect(res.result.data.accountServices[0].name).to.equal('Logout');
-    expect(res.result.data.accountServices[0].url).to.equal('/logout');
+    const res = await server.inject({ url: '/graphql', method: 'post', payload: { query: 'query { account { services { name, url } } }' } });
+    expect(res.result.data.account.services[0].name).to.equal('Logout');
+    expect(res.result.data.account.services[0].url).to.equal('/logout');
 
     await server.stop();
   });
