@@ -5,10 +5,11 @@ const Path = require('path');
 const { expect } = require('code');
 const { graphql } = require('graphi');
 const Hapi = require('hapi');
+const Sso = require('hapi-triton-auth');
 const Lab = require('lab');
 const StandIn = require('stand-in');
-const Navigation = require('../');
 const CloudApi = require('webconsole-cloudapi-client');
+const Navigation = require('../');
 
 
 const schema = Fs.readFileSync(Path.join(__dirname, '../lib/schema.graphql'));
@@ -17,18 +18,36 @@ const MockData = require('./mock-data.json');
 const lab = exports.lab = Lab.script();
 const { afterEach, describe, it } = lab;
 
+const keyPath = Path.join(__dirname, 'test.key');
 const options = Object.assign(MockData, {
-  keyPath: Path.join(__dirname, 'test.key'),
+  keyPath,
   keyId: '/boo/keys/test',
   apiBaseUrl: 'http://localhost',
   baseUrl: 'http://us-east-1.test.com',
   dcName: 'us-east-1'
 });
 
-const register = {
-  plugin: Navigation,
-  options
-};
+const register = [
+  {
+    plugin: Sso,
+    options: {
+      keyPath,
+      keyId: '/boo/keys/test',
+      apiBaseUrl: 'http://localhost',
+      ssoUrl: 'https://sso.joyent.com/login',
+      permissions: { 'cloudapi': ['/my/*'] },
+      baseUrl: 'http://localhost',
+      isDev: true,
+      cookie: {
+        isSecure: false
+      }
+    }
+  },
+  {
+    plugin: Navigation,
+    options
+  }
+];
 
 describe('Navigation', () => {
   afterEach(() => {
@@ -113,7 +132,7 @@ describe('Navigation', () => {
     await server.initialize();
 
     const res = await server.inject({ url: '/graphql', method: 'post', payload: { query: 'query { regions { datacenters { name url } } }' } });
-    expect(res.result.data.regions[0].datacenters[0].name).to.equal(register.options.regions[0].datacenters[0].name);
+    expect(res.result.data.regions[0].datacenters[0].name).to.equal(options.regions[0].datacenters[0].name);
     await server.stop();
   });
 
@@ -123,10 +142,10 @@ describe('Navigation', () => {
     await server.initialize();
 
     const res = await server.inject({ url: '/graphql', method: 'post', payload: { query: 'query { categories { name services { name url } } }' } });
-    expect(res.result.data.categories[0].name).to.equal(register.options.categories[0].name);
+    expect(res.result.data.categories[0].name).to.equal(options.categories[0].name);
     expect(res.result.data.categories[0].services[0].name).to.equal('VMs & Containers');
-    expect(res.result.data.categories[0].services[0].url).to.equal(register.options.baseUrl + '/instances');
-    expect(res.result.data.categories[1].services[1].url).to.equal(register.options.baseUrl + '/');
+    expect(res.result.data.categories[0].services[0].url).to.equal(options.baseUrl + '/instances');
+    expect(res.result.data.categories[1].services[1].url).to.equal(options.baseUrl + '/');
     expect(res.result.data.categories[4].services[0].name).to.equal('Service Status');
     expect(res.result.data.categories[4].services[0].url).to.equal('https://joyent.com/support');
 
@@ -164,9 +183,11 @@ describe('Navigation', () => {
     await server.register(register);
     await server.initialize();
 
-    const res = await server.inject({ url: '/graphql', method: 'post', payload: { query: 'query { account { services { name, url } } }' } });
+    const res = await server.inject({ url: '/graphql', method: 'post', payload: { query: 'query { account { services { name, slug, url } } }' } });
     expect(res.result.data.account.services[0].name).to.equal('Logout');
     expect(res.result.data.account.services[0].url).to.equal('/logout');
+    expect(res.result.data.account.services[1].slug).to.equal('change-password');
+    expect(res.result.data.account.services[1].url).to.equal('https://sso.joyent.com/changepassword/4fc13ac6-1e7d-cd79-f3d2-96276af0d638');
 
     await server.stop();
   });
