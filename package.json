@@ -4,7 +4,7 @@
   "description": "Webconsole navigation plugin for hapi",
   "main": "lib",
   "scripts": {
-    "dev": "NODE_ENV=development NAMESPACE=navigation node -r ./.env.js dev-server.js",
+    "dev": "NODE_ENV=development node -r dotenv/config --inspect dev-server.js dotenv_config_path=.env",
     "lint": "belly-button -f",
     "pretest": "yarn lint",
     "test": "lab -t 95",
@@ -30,8 +30,9 @@
   "devDependencies": {
     "belly-button": "4.x.x",
     "code": "5.x.x",
+    "dotenv": "5.x.x",
     "graphi": "5.7.x",
-    "hapi": "17.x.x",
+    "hapi": "17.4.x",
     "hapi-triton-auth": "2.x.x",
     "lab": "15.x.x",
     "stand-in": "4.x.x"

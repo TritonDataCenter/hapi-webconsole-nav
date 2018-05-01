@@ -1,6 +1,7 @@
 'use strict';
 
 const Url = require('url');
+const Graphi = require('graphi');
 const Hapi = require('hapi');
 const Sso = require('hapi-triton-auth');
 const Navigation = require('.');
@@ -13,7 +14,7 @@ const {
   SDC_ACCOUNT,
   SDC_KEY_ID,
   SDC_URL,
-  BASE_URL = 'http://0.0.0.0:3068',
+  BASE_URL = 'http://0.0.0.0:8080',
   DC_NAME
 } = process.env;
 
@@ -24,7 +25,7 @@ const options = Object.assign(MockData, {
     return Object.assign(region, {
       datacenters: region.datacenters.map((dc) => {
         return Object.assign(dc, {
-          url: 'http://127.0.0.1:3068'
+          url: BASE_URL
         });
       })
     });
@@ -38,7 +39,7 @@ const options = Object.assign(MockData, {
 });
 
 const server = Hapi.server({
-  port: 3068,
+  port: 8080,
   routes: {
     cors: {
       origin: ['*'],
@@ -86,6 +87,13 @@ async function main () {
           isHttpOnly: true,
           ttl: 1000 * 60 * 60       // 1 hour
         }
+      }
+    },
+    {
+      plugin: Graphi,
+      options: {
+        authStrategy: 'sso',
+        graphiqlPath: '/navigation/graphiql'
       }
     },
     {
