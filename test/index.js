@@ -3,7 +3,7 @@
 const Fs = require('fs');
 const Path = require('path');
 const { expect } = require('code');
-const { graphql } = require('graphi');
+const Graphi = require('graphi');
 const Hapi = require('hapi');
 const Sso = require('hapi-triton-auth');
 const Lab = require('lab');
@@ -44,6 +44,36 @@ const register = [
     }
   },
   {
+    plugin: Graphi
+  },
+  {
+    plugin: Navigation,
+    options
+  }
+];
+
+const prodRegister = [
+  {
+    plugin: Sso,
+    options: {
+      keyPath,
+      keyId: '/boo/keys/test',
+      apiBaseUrl: 'http://localhost',
+      ssoUrl: 'https://sso.joyent.com/login',
+      permissions: { 'cloudapi': ['/my/*'] },
+      baseUrl: 'http://localhost',
+      cookie: {
+        isSecure: false
+      }
+    }
+  },
+  {
+    plugin: Graphi,
+    options: {
+      authStrategy: 'sso'
+    }
+  },
+  {
     plugin: Navigation,
     options
   }
@@ -61,7 +91,7 @@ describe('Navigation', () => {
 
   it('has a resolver for every query and mutation in the schema', async () => {
     const fields = [];
-    const parsed = graphql.parse(schema.toString());
+    const parsed = Graphi.graphql.parse(schema.toString());
     for (const def of parsed.definitions) {
       if (def.kind !== 'ObjectTypeDefinition' || (def.name.value !== 'Query' && def.name.value !== 'Mutation')) {
         continue;
@@ -188,6 +218,17 @@ describe('Navigation', () => {
     expect(res.result.data.account.services[0].url).to.equal('/logout');
     expect(res.result.data.account.services[1].slug).to.equal('change-password');
     expect(res.result.data.account.services[1].url).to.equal('https://sso.joyent.com/changepassword/4fc13ac6-1e7d-cd79-f3d2-96276af0d638');
+
+    await server.stop();
+  });
+
+  it('requires authentication to access graphql endooint', async () => {
+    const server = new Hapi.Server();
+    await server.register(prodRegister);
+    await server.initialize();
+
+    const res = await server.inject({ url: '/graphql', method: 'post', payload: { query: 'query { account { services { name, slug, url } } }' } });
+    expect(res.statusCode).to.equal(302);
 
     await server.stop();
   });
